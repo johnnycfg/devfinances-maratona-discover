@@ -132,7 +132,9 @@
             <div id="form">
                 <h2>Edição de Transação</h2>
 
-                <form action="" onsubmit="Form.submit(event)">
+                <form action="" onsubmit="EditForm.submit(event)">
+                    <input class="sr-only" id="index">
+
                     <div class="input-group">
                         <label class="sr-only" for="description">Descrição</label>
                         <input 
@@ -168,7 +170,7 @@
                         <a 
                             href="#" 
                             class="button cancel"
-                            onclick="ModalEdit.modalToggle()"
+                            onclick="EditModal.modalToggle()"
                         >
                             Cancelar
                         </a>

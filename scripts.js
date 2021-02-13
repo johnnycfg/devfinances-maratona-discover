@@ -7,7 +7,7 @@ const Modal = {
     }  
 }
 
-const ModalEdit = {
+const EditModal = {
     modalToggle () {
         document
             .querySelector('.modal-overlay-edit')
@@ -41,18 +41,16 @@ const Transaction = {
         App.reload();
     },
 
-    edit(index) {
-        ModalEdit.modalToggle();
-        description = document.querySelector('input#description-edit');
-        amount = document.querySelector('input#amount-edit');
-        date = document.querySelector('input#date-edit');
-
-        Transaction.all.forEach(function(item, i) {
+    
+    update(transaction, index) {
+        let newArrObj = Transaction.all.map(function(t, i){
             if (index === i) {
-                description.value = item.description;
-                amount.value = item.amount;
-                date.value = Utils.formatDateInverse(item.date);
+                t.description = transaction.description;
+                t.amount = transaction.amount;
+                t.date = transaction.date;
             }
+            
+            return t;
         });
     },
 
@@ -110,7 +108,7 @@ const DOM = {
             <td class="date">${transaction.date}</td>
             <td>
                 <img class="action-icon" onclick="Transaction.remove(${index})" src="./assets/minus.svg" alt="Remover transação">
-                <img class="action-icon" onclick="Transaction.edit(${index})" src="./assets/pencil.svg" alt="Editar transação">
+                <img class="action-icon" onclick="EditForm.edit(${index})" src="./assets/pencil.svg" alt="Editar transação">
             </td>
         `;
 
@@ -139,6 +137,11 @@ const Utils = {
     formatAmount(value) {
         value = value * 100;
         
+        return value;
+    },
+    formatAmountInverse(value) {
+        value = value / 100;
+
         return value;
     },
     formatDate(date) {
@@ -217,6 +220,81 @@ const Form = {
             Form.clearFields();
             
             Modal.modalToggle();
+
+            App.reload();
+        }   catch (error) {
+            alert(error.message);
+        }
+    }
+}
+
+const EditForm = {
+    description: document.querySelector('input#description-edit'),
+    amount: document.querySelector('input#amount-edit'),
+    date: document.querySelector('input#date-edit'),
+    index: document.querySelector('input#index'),
+
+    edit(index) {
+        EditModal.modalToggle();
+
+        Transaction.all.forEach(function(transaction, i) {
+            if (index === i) {
+                EditForm.setValues(transaction, index);
+            }
+        });
+    },
+    setValues(transaction, index) {
+        EditForm.description.value = transaction.description;
+        EditForm.amount.value = Utils.formatAmountInverse(transaction.amount);
+        EditForm.date.value = Utils.formatDateInverse(transaction.date);
+        EditForm.index.value = index;
+    },
+    getValues() {
+        return {
+            description: EditForm.description.value,
+            amount: EditForm.amount.value,
+            date: EditForm.date.value,
+        }
+    },
+    validateFields() {
+        const {description, amount, date} = EditForm.getValues();
+        
+        if(
+            description.trim() === "" ||
+            amount.trim() === "" ||
+            date.trim() === "") {
+                throw new Error("Por favor, preencha todos os campos");
+        }
+    },
+    formatValues() {
+        let {description, amount, date} = EditForm.getValues();
+        amount = Utils.formatAmount(amount);
+        date = Utils.formatDate(date);
+
+        return {
+            description,
+            amount,
+            date
+        }
+    },
+    clearFields() {
+        EditForm.description.value = "";
+        EditForm.amount.value = "";
+        EditForm.date.value = "";
+    },
+    submit(event) {
+        event.preventDefault();
+
+        try {
+            EditForm.validateFields();
+
+            const transaction = EditForm.formatValues();
+
+            Transaction.update(transaction, Number(EditForm.index.value));
+
+            EditForm.clearFields();
+            
+            EditModal.modalToggle();
 
             App.reload();
         }   catch (error) {
