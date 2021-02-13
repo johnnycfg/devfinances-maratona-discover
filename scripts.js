@@ -7,6 +7,15 @@ const Modal = {
     }  
 }
 
+const ModalEdit = {
+    modalToggle () {
+        document
+            .querySelector('.modal-overlay-edit')
+            .classList
+            .toggle('active')
+    }  
+}
+
 const Storage = {
     get() {
         return JSON.parse(localStorage.getItem("dev.finances:transactions")) || [];
@@ -30,6 +39,21 @@ const Transaction = {
     remove(index) {
         Transaction.all.splice(index, 1);
         App.reload();
+    },
+
+    edit(index) {
+        ModalEdit.modalToggle();
+        description = document.querySelector('input#description-edit');
+        amount = document.querySelector('input#amount-edit');
+        date = document.querySelector('input#date-edit');
+
+        Transaction.all.forEach(function(item, i) {
+            if (index === i) {
+                description.value = item.description;
+                amount.value = item.amount;
+                date.value = Utils.formatDateInverse(item.date);
+            }
+        });
     },
 
     incomes () {
@@ -85,7 +109,8 @@ const DOM = {
             <td class="${CSSclass}">${amount}</td>
             <td class="date">${transaction.date}</td>
             <td>
-                <img onclick="Transaction.remove(${index})" src="./assets/minus.svg" alt="Remover transação">
+                <img class="action-icon" onclick="Transaction.remove(${index})" src="./assets/minus.svg" alt="Remover transação">
+                <img class="action-icon" onclick="Transaction.edit(${index})" src="./assets/pencil.svg" alt="Editar transação">
             </td>
         `;
 
@@ -119,6 +144,10 @@ const Utils = {
     formatDate(date) {
         const splittedDate = date.split("-");
         return `${splittedDate[2]}/${splittedDate[1]}/${splittedDate[0]}`
+    },
+    formatDateInverse(date) {
+        const splittedDate = date.split("/");
+        return `${splittedDate[2]}-${splittedDate[1]}-${splittedDate[0]}`
     },
 
     formatCurrency(value) { 
@@ -217,3 +246,4 @@ App.init();
 
 
 
+//Transaction.edit(1);

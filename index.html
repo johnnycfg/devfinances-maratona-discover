@@ -63,7 +63,7 @@
                         <th>Descrição</th>
                         <th>Valor</th>
                         <th>Data</th>
-                        <th>Ação</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -117,6 +117,58 @@
                             href="#" 
                             class="button cancel"
                             onclick="Modal.modalToggle()"
+                        >
+                            Cancelar
+                        </a>
+                        <button>Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay-edit">
+        <div class="modal">
+            <div id="form">
+                <h2>Edição de Transação</h2>
+
+                <form action="" onsubmit="Form.submit(event)">
+                    <div class="input-group">
+                        <label class="sr-only" for="description">Descrição</label>
+                        <input 
+                            type="text" 
+                            id="description-edit" 
+                            name="description"
+                            placeholder="Descrição"
+                        >
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="sr-only" for="amount">Valor</label>
+                        <input 
+                            type="number" 
+                            step="0.01"
+                            id="amount-edit" 
+                            name="amount"
+                            placeholder="0,00"
+                        >
+                        <small class="help">Use o sinal - (negativo) e , (vírgula) para casas decimais</small>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="sr-only" for="date">Data</label>
+                        <input 
+                            type="date" 
+                            id="date-edit" 
+                            name="date"
+                        >
+                    </div>
+
+                    <div class="input-group actions">
+                        <a 
+                            href="#" 
+                            class="button cancel"
+                            onclick="ModalEdit.modalToggle()"
                         >
                             Cancelar
                         </a>
