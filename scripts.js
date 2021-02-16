@@ -89,7 +89,20 @@ const Transaction = {
 
 const DOM = {
     transactionsContainer: document.querySelector('#data-table tbody'),
+    populate() {
+        DOM.clearTransactions();
 
+        let page = state.page - 1;
+        let start = page * state.perPage;
+        let end = start + state.perPage;
+
+        const paginatedRows = Transaction.all.slice(start, end);
+
+        paginatedRows.forEach(function(transaction, index) {
+            let newIndex = index + start;
+            DOM.addTransaction(transaction, newIndex);
+        });
+    },
     addTransaction(transaction, index) {
         const tr = document.createElement('tr');
         tr.innerHTML = DOM.innerHMTLTransaction(transaction, index);
@@ -139,15 +152,18 @@ const Utils = {
         
         return value;
     },
+    
     formatAmountInverse(value) {
         value = value / 100;
 
         return value;
     },
+
     formatDate(date) {
         const splittedDate = date.split("-");
         return `${splittedDate[2]}/${splittedDate[1]}/${splittedDate[0]}`
     },
+
     formatDateInverse(date) {
         const splittedDate = date.split("/");
         return `${splittedDate[2]}-${splittedDate[1]}-${splittedDate[0]}`
@@ -303,11 +319,81 @@ const EditForm = {
     }
 }
 
+
+const html = {
+    get(element) {
+        return document.querySelector(element);
+    }
+}
+
+let perPage = 5;
+const state = {
+    page: 1,
+    perPage,
+    totalPages: Math.ceil(Transaction.all.length / perPage),
+}
+
+const controls = {
+    next() {
+        state.page++;
+
+        const lastPage = state.page > state.totalPages;
+
+        if(lastPage) {
+            state.page--;
+        }
+    },
+    prev() {
+        state.page--;
+
+        if(state.page < 1) {
+            state.page++;
+        }
+    },
+    goTo(page) {
+        state.page = page;
+
+        if(page < 1) {
+            state.page = 1
+        }
+
+        if(page > state.totalPages) {
+            state.page = state.totalPages;
+        }
+    },
+    createListeners() {
+        html.get('.first').addEventListener('click', () => {
+            controls.goTo(1);
+            update();
+        });
+
+        html.get('.last').addEventListener('click', () => {
+            controls.goTo(state.totalPages);
+            update();
+        });
+
+        html.get('.next').addEventListener('click', () => {
+            controls.next();
+            update();
+        });
+
+        html.get('.prev').addEventListener('click', () => {
+            controls.prev();
+            update();
+        });
+    }
+}
+
+function update() {
+    console.log(state.page);
+    App.init();
+}
+
 const App = {
     init() {
-        Transaction.all.forEach(function(transaction, index) {
-            DOM.addTransaction(transaction, index);
-        });
+        
+
+        DOM.populate();
 
         DOM.updateBalance();
 
@@ -322,6 +408,9 @@ const App = {
 
 App.init();    
 
+controls.createListeners();
 
 
-//Transaction.edit(1);
+
+
+console.log('totalPages: ' + state.totalPages);

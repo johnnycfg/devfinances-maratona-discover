@@ -216,9 +216,45 @@ td.expense {
 }
 
 .action-icon {
-    max-width: 2rem;
-    margin-right: 15px;
+    max-width: 1.7rem;
+    margin-right: 10px;
+    margin-bottom: 10px;
 }
+
+/* Pagination ================ */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-top: 8px;
+    
+}
+
+.pagination div {
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 100%; /* 15px */
+    font-weight: bold;
+    color: var(--green);
+}
+
+.pagination div:not(.numbers),
+.pagination div.numbers div {
+    width: 40px;
+    height: 40px;
+}
+
+.pagination div:not(.numbers):hover,
+.pagination div.numbers div:hover,
+.pagination div.numbers div:active {
+    color: var(--light-green);
+}
+
 
 /* Modal ================ */
 .modal-overlay,
@@ -313,6 +349,6 @@ footer {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 2rem;
-
     }
+
 }
