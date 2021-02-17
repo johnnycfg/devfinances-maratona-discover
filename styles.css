@@ -222,6 +222,16 @@ td.expense {
 }
 
 /* Pagination ================ */
+.footer-controls {
+    display: block;
+    text-align: center;
+}
+
+.datatable-status {
+    color: var(--dark-blue);
+    font-size: 87.5%;
+}
+
 .pagination {
     display: flex;
     align-items: center;
@@ -253,6 +263,10 @@ td.expense {
 .pagination div.numbers div:hover,
 .pagination div.numbers div:active {
     color: var(--light-green);
+}
+
+.active {
+    color: var(--light-green) !important;
 }
 
 
@@ -349,6 +363,12 @@ footer {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 2rem;
+    }
+
+    .footer-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
 
 }

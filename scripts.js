@@ -43,7 +43,7 @@ const Transaction = {
 
     
     update(transaction, index) {
-        let newArrObj = Transaction.all.map(function(t, i){
+        Transaction.all.map(function(t, i){
             if (index === i) {
                 t.description = transaction.description;
                 t.amount = transaction.amount;
@@ -99,9 +99,12 @@ const DOM = {
         const paginatedRows = Transaction.all.slice(start, end);
 
         paginatedRows.forEach(function(transaction, index) {
+            //setting new index because after Transaction.all is sliced, paginatedRows index start on position 0
             let newIndex = index + start;
             DOM.addTransaction(transaction, newIndex);
         });
+
+        return paginatedRows.length;
     },
     addTransaction(transaction, index) {
         const tr = document.createElement('tr');
@@ -326,11 +329,13 @@ const html = {
     }
 }
 
+// Pagination scripts
 let perPage = 5;
 const state = {
     page: 1,
     perPage,
     totalPages: Math.ceil(Transaction.all.length / perPage),
+    maxVisibleButtons: 5
 }
 
 const controls = {
@@ -351,7 +356,7 @@ const controls = {
         }
     },
     goTo(page) {
-        state.page = page;
+        state.page = +page;
 
         if(page < 1) {
             state.page = 1
@@ -384,20 +389,83 @@ const controls = {
     }
 }
 
+const buttons = {
+    element: html.get('.pagination .numbers'),
+    create(number) {
+        const button = document.createElement('div');
+        
+        button.innerHTML = number;
+
+        if(state.page == number) {
+            button.classList.add('active');
+        }
+
+        button.addEventListener('click', (event) => {
+            const page = event.target.innerText;
+            controls.goTo(page);
+            update();
+        });
+
+        buttons.element.appendChild(button);
+    },
+    update() {
+        html.get('.pagination .numbers').innerHTML = "";
+        const {maxLeft, maxRight} = buttons.calculateMaxVisible();
+
+        for(let page = maxLeft; page <= maxRight; page++) {
+            buttons.create(page);
+        }
+    },
+    calculateMaxVisible() {
+        const { maxVisibleButtons } = state;
+        let maxLeft = (state.page - Math.floor(maxVisibleButtons / 2));
+        let maxRight = (state.page + Math.floor(maxVisibleButtons / 2));
+
+        if( maxLeft < 1) {
+            maxLeft = 1;
+            maxRight = maxVisibleButtons;
+        }
+
+        if( maxRight > state.totalPages) {
+            maxLeft = state.totalPages - (maxVisibleButtons - 1);
+            maxRight = state.totalPages;
+
+            if(maxLeft < 1) {
+                maxLeft = 1
+            }
+        }
+
+        return {maxLeft, maxRight}
+    }
+}
+
+function dataTableStatus(rows) {
+    const statusBar = html.get('.datatable-status');
+    const totalTransactions = Transaction.all.length;
+
+    start = (rows * state.page) - (rows - 1);
+    end = (rows * state.page);
+    
+    
+    statusBar.innerHTML = 'Mostrando ' + start + ' / ' + end + ' de ' + totalTransactions + ' registro(s)';
+}
+
 function update() {
-    console.log(state.page);
     App.init();
+    
 }
 
 const App = {
     init() {
-        
+        const rows = DOM.populate();
 
-        DOM.populate();
+        buttons.update();
 
         DOM.updateBalance();
 
         Storage.set(Transaction.all);
+
+        dataTableStatus(rows);
     },
 
     reload() {
@@ -413,4 +481,3 @@ controls.createListeners();
 
 
 
-console.log('totalPages: ' + state.totalPages);
