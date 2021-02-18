@@ -33,6 +33,9 @@ const Transaction = {
 
     add(transaction) {
         Transaction.all.push(transaction);
+        
+        Transaction.sortArrObj();
+
         App.reload();
     },
 
@@ -52,6 +55,19 @@ const Transaction = {
             
             return t;
         });
+    },
+
+    sortArrObj() {
+        const newArrObj = Transaction.all.sort((a, b) => {
+            let dateA = new Date(Utils.formatDateInverse(a.date)),
+                dateB = new Date(Utils.formatDateInverse(b.date));
+            
+            return dateB.getTime() - dateA.getTime();
+        });
+
+        console.log(newArrObj);
+
+        Storage.set(newArrObj);
     },
 
     incomes () {
@@ -99,7 +115,7 @@ const DOM = {
         const paginatedRows = Transaction.all.slice(start, end);
 
         paginatedRows.forEach(function(transaction, index) {
-            //setting new index because after Transaction.all is sliced, paginatedRows index start on position 0
+            //setting new (correct) index because after Transaction.all is sliced, paginatedRows index start on position 0
             let newIndex = index + start;
             DOM.addTransaction(transaction, newIndex);
         });
@@ -335,7 +351,7 @@ const state = {
     page: 1,
     perPage,
     totalPages: Math.ceil(Transaction.all.length / perPage),
-    maxVisibleButtons: 5
+    maxVisibleButtons: 3
 }
 
 const controls = {
@@ -447,7 +463,7 @@ function dataTableStatus(rows) {
     end = (rows * state.page);
     
     
-    statusBar.innerHTML = 'Mostrando ' + start + ' / ' + end + ' de ' + totalTransactions + ' registro(s)';
+    statusBar.innerHTML = 'Mostrando ' + start + '-' + end + ' de ' + totalTransactions + ' registro(s)';
 }
 
 function update() {
@@ -477,7 +493,4 @@ const App = {
 App.init();    
 
 controls.createListeners();
-
-
-
 
