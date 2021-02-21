@@ -43,7 +43,6 @@ const Transaction = {
         Transaction.all.splice(index, 1);
         App.reload();
     },
-
     
     update(transaction, index) {
         Transaction.all.map(function(t, i){
@@ -64,8 +63,6 @@ const Transaction = {
             
             return dateB.getTime() - dateA.getTime();
         });
-
-        console.log(newArrObj);
 
         Storage.set(newArrObj);
     },
@@ -103,25 +100,81 @@ const Transaction = {
     }
 }
 
+// last searched transactions array to be used instead Transaction.all array in a global scope
+let searchedArr = [];
+const stateLastSearch = {
+    searchedArr
+}
+
 const DOM = {
     transactionsContainer: document.querySelector('#data-table tbody'),
-    populate() {
+    searchKey: document.querySelector('input#search'),
+
+    searchTransactions() {
+        const searchKey = document.querySelector('input#search');
+
+        searchKey.addEventListener('keyup', () => {
+            let newArrObj = Transaction.all.map((transaction, index) => {
+                if(transaction.description.toLowerCase().includes(searchKey.value.toLowerCase())) {
+                    return {
+                        index: index,
+                        amount: transaction.amount,
+                        description: transaction.description,
+                        date: transaction.date
+                    };
+                }
+            });
+
+            let treatedArrObj = newArrObj.filter((transaction) => {
+                return transaction !== undefined
+            });
+
+            stateLastSearch.searchedArr = treatedArrObj;
+
+            DOM.populate(treatedArrObj);
+        });
+    },
+    
+    populate(treatedArrObj) {
         DOM.clearTransactions();
+
+        if(DOM.searchKey.value === '') {
+            state.totalPages = Math.ceil(Transaction.all.length / state.perPage);
+        } else {
+            state.totalPages = Math.ceil(stateLastSearch.searchedArr.length / state.perPage);
+        }
+
+        if(treatedArrObj === undefined) {
+            treatedArrObj = stateLastSearch.searchedArr;
+        }
+
+        const searchKey = document.querySelector('input#search').value.trim();
 
         let page = state.page - 1;
         let start = page * state.perPage;
         let end = start + state.perPage;
 
-        const paginatedRows = Transaction.all.slice(start, end);
+        if(searchKey === '') {
+            const paginatedRows = Transaction.all.slice(start, end); 
 
-        paginatedRows.forEach(function(transaction, index) {
-            //setting new (correct) index because after Transaction.all is sliced, paginatedRows index start on position 0
-            let newIndex = index + start;
-            DOM.addTransaction(transaction, newIndex);
-        });
+            paginatedRows.forEach(function(transaction, index) {
+                DOM.addTransaction(transaction, index);
+            });
 
-        return paginatedRows.length;
+            dataTableStatus({qttRows: paginatedRows.length, start});
+        } else {
+            const paginatedRows = treatedArrObj.slice(start, end); 
+
+            paginatedRows.forEach(function(transaction) {
+                DOM.addTransaction(transaction, transaction.index);
+            });
+
+            dataTableStatus({qttRows: paginatedRows.length, start});
+        }
+
+        buttons.update();
     },
+
     addTransaction(transaction, index) {
         const tr = document.createElement('tr');
         tr.innerHTML = DOM.innerHMTLTransaction(transaction, index);
@@ -129,6 +182,7 @@ const DOM = {
 
         DOM.transactionsContainer.appendChild(tr);
     },
+
     innerHMTLTransaction(transaction, index) {
         const CSSclass = transaction.amount > 0 ? "income" : "expense";
 
@@ -146,6 +200,7 @@ const DOM = {
 
         return html;
     },
+
     updateBalance() {
         document
             .getElementById('incomeDisplay')
@@ -216,6 +271,7 @@ const Form = {
             date: Form.date.value,
         }
     },
+
     valideFields() {
         const {description, amount, date} = Form.getValues();
         
@@ -226,6 +282,7 @@ const Form = {
                 throw new Error("Por favor, preencha todos os campos");
         }
     },
+
     formatValues() {
         let {description, amount, date} = Form.getValues();
         amount = Utils.formatAmount(amount);
@@ -237,11 +294,13 @@ const Form = {
             date
         }
     },
+
     clearFields() {
         Form.description.value = "";
         Form.amount.value = "";
         Form.date.value = "";
     },
+
     submit(event) {
         event.preventDefault();
 
@@ -316,6 +375,7 @@ const EditForm = {
         EditForm.description.value = "";
         EditForm.amount.value = "";
         EditForm.date.value = "";
+        EditForm.index.value = "";
     },
     submit(event) {
         event.preventDefault();
@@ -347,10 +407,11 @@ const html = {
 
 // Pagination scripts
 let perPage = 5;
+let totalPages = Math.ceil(Transaction.all.length / perPage);
 const state = {
     page: 1,
     perPage,
-    totalPages: Math.ceil(Transaction.all.length / perPage),
+    totalPages,
     maxVisibleButtons: 3
 }
 
@@ -364,6 +425,7 @@ const controls = {
             state.page--;
         }
     },
+
     prev() {
         state.page--;
 
@@ -371,6 +433,7 @@ const controls = {
             state.page++;
         }
     },
+
     goTo(page) {
         state.page = +page;
 
@@ -382,6 +445,7 @@ const controls = {
             state.page = state.totalPages;
         }
     },
+
     createListeners() {
         html.get('.first').addEventListener('click', () => {
             controls.goTo(1);
@@ -407,6 +471,7 @@ const controls = {
 
 const buttons = {
     element: html.get('.pagination .numbers'),
+
     create(number) {
         const button = document.createElement('div');
         
@@ -424,6 +489,7 @@ const buttons = {
 
         buttons.element.appendChild(button);
     },
+
     update() {
         html.get('.pagination .numbers').innerHTML = "";
         const {maxLeft, maxRight} = buttons.calculateMaxVisible();
@@ -432,6 +498,7 @@ const buttons = {
             buttons.create(page);
         }
     },
+    
     calculateMaxVisible() {
         const { maxVisibleButtons } = state;
         let maxLeft = (state.page - Math.floor(maxVisibleButtons / 2));
@@ -457,31 +524,36 @@ const buttons = {
 
 function dataTableStatus(rows) {
     const statusBar = html.get('.datatable-status');
+
     const totalTransactions = Transaction.all.length;
 
-    start = (rows * state.page) - (rows - 1);
-    end = (rows * state.page);
+    const start = DOM.searchKey.value !== '' && stateLastSearch.searchedArr.length === 0 ? 0 : rows.start + 1;
+    const end =  rows.start + rows.qttRows;
     
-    
-    statusBar.innerHTML = 'Mostrando ' + start + '-' + end + ' de ' + totalTransactions + ' registro(s)';
+    statusBar.innerHTML = `Mostrando ${start}-${end} de ${totalTransactions} registro(s)`;
+}
+
+function SelectPerPage() {
+    const select =  document.querySelector('#perPage');
+
+    state.perPage = select.value;
+
+    update();
 }
 
 function update() {
     App.init();
-    
 }
 
 const App = {
     init() {
-        const rows = DOM.populate();
+        DOM.populate();
 
         buttons.update();
 
         DOM.updateBalance();
 
         Storage.set(Transaction.all);
-
-        dataTableStatus(rows);
     },
 
     reload() {
@@ -493,4 +565,6 @@ const App = {
 App.init();    
 
 controls.createListeners();
+
+DOM.searchTransactions();
 

@@ -80,7 +80,6 @@ button:hover {
 
 .button.new {
     display: inline-block;
-    margin-bottom: 0.8rem;
 }
 
 .button.cancel {
@@ -155,8 +154,59 @@ header {
     color: #fff;
 }
 
+/* Search bar =========== */
+.searchBarArea {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+
+    margin-bottom: 20px;
+}
+
+.searchBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+
+    width: 80%;
+
+    background-color: #fff;
+    border-radius: 25px;
+}
+
+.searchBar img {
+    margin-left: 1rem;
+    max-width: 2rem;
+}
+
+.searchBar input {
+    max-width: 100%;
+    border-radius: 25px;
+    outline: none;
+}
+
+/* Operations =========== */
+.operations {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    margin-bottom: 0.8rem;
+}
+
+.selectPerPage {
+    color: var(--dark-blue);
+    font-size: 87.5%;
+}
+
+#perPage {
+    outline: none;
+}
+
 /* Table ================ */
-#transaction {
+#transaction-datatable {
     display: block;
     width: 100%;
     overflow-x: auto;
@@ -225,6 +275,7 @@ td.expense {
 .footer-controls {
     display: block;
     text-align: center;
+    margin-top: 10px;
 }
 
 .datatable-status {
@@ -369,6 +420,7 @@ footer {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        margin-top: 0;
     }
 
 }
