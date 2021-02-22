@@ -6,6 +6,14 @@
   This application was created during the "Maratona Discover".
 </h4>
 
+From the application completed in the marathon, it was included:
+
+- Transaction edit
+- Datatable pagination
+- Search bar
+- The option to choose how many transactions to see on the datatable
+- Sorting transactions by descending transaction date
+
 <p align="center">
   <a href="#rocket-technologies">Technologies</a>
 </p>
