@@ -533,6 +533,14 @@ function dataTableStatus(rows) {
     statusBar.innerHTML = `Mostrando ${start}-${end} de ${totalTransactions} registro(s)`;
 }
 
+function clearSearchInput() {
+    const input = document.querySelector('input#search');
+
+    input.addEventListener('search', () => {
+        update();
+    });
+}
+
 function SelectPerPage() {
     const select =  document.querySelector('#perPage');
 
@@ -567,4 +575,6 @@ App.init();
 controls.createListeners();
 
 DOM.searchTransactions();
+
+clearSearchInput();
 
